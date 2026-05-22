@@ -31,6 +31,27 @@ Then check that the application is running:
 
 You will see that there are some parts of the application that produce errors. Your task in this project is to complete the backend code and eliminate those errors. Let's get started!
 
+### Optional: Using `uv`
+
+If running locally from the cloned Github repository with `uv` installed on the hosted machine
+
+#### Running the application
+
+Navigate  to the `starter` folder, run the Flask server
+
+```bash
+uv run python -m backend.app
+```
+
+#### Running the tests
+
+Navigate  to the `starter` folder, run pytest
+
+```bash
+uv run pytest
+```
+
+
 ---
 
 ## Part 2: Unit Testing The `OrderTracker` (The TDD Cycle)

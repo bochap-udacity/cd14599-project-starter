@@ -1,0 +1,14 @@
+[project]
+name = "starter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11.9"
+dependencies = [
+    "flask==3.1.2"
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
