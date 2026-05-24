@@ -37,9 +37,11 @@ class OrderTracker:
         return self.storage.get_order(order_id=order_id)
 
     def update_order_status(self, order_id: str, new_status: str) -> dict[str, str | int]:
+        if not new_status or new_status not in ["pending", "processing", "shipped"]:
+            raise ValueError(f"Invalid status update (Value: '{new_status}')")
         existing = self.get_order_by_id(order_id=order_id)
         if not existing:
-            raise KeyError(f"Order '{order_id}' not found")
+            raise KeyError(f"Order '{order_id}' not found")        
         return self.storage.save_order(
             order_id=order_id,
             order_data={

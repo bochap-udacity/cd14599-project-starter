@@ -37,6 +37,13 @@ def test_update_order_status_api_success(client):
     assert response.status_code == 200
     assert response.json['status'] == "shipped"
 
+def test_update_order_status_api_bad_status_failure(client):
+    client.post('/api/orders', json={
+        "order_id": "UPDATE001", "item_name": "Test Item", "quantity": 1, "customer_id": "C1"
+    })
+    response = client.put('/api/orders/UPDATE001/status', json={"new_status": ""})
+    assert response.status_code == 500
+
 def test_list_all_orders_api_with_data(client):
     client.post('/api/orders', json={"order_id": "LST001", "item_name": "Item A", "quantity": 1, "customer_id": "C1"})
     client.post('/api/orders', json={"order_id": "LST002", "item_name": "Item B", "quantity": 2, "customer_id": "C2"})
@@ -51,3 +58,9 @@ def test_list_orders_by_status_api_matching(client):
     assert response.status_code == 200
     assert len(response.json) == 1
     assert response.json[0]['order_id'] == "S001"
+
+def test_list_orders_by_status_bad_status_failure(client):
+    client.post('/api/orders', json={"order_id": "S001", "item_name": "A", "quantity": 1, "customer_id": "C1", "status": "pending"})
+    client.post('/api/orders', json={"order_id": "S002", "item_name": "B", "quantity": 2, "customer_id": "C2", "status": "shipped"})
+    response = client.get('/api/orders?status=')
+    assert response.status_code == 500

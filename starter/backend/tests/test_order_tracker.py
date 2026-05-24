@@ -1,4 +1,5 @@
 import pytest
+import re
 from unittest.mock import Mock
 from ..order_tracker import OrderTracker
 
@@ -83,8 +84,12 @@ def test_get_order_by_id_returns_none_error_if_not_exists(
     mock_storage.get_order.assert_called_once_with(order_id=order_id)
     assert actual == expected
 
+@pytest.mark.parametrize(
+    "old_status, new_status",
+    [("processing", "shipped"), ("pending", "processing")]
+)
 def test_update_order_status_successfully(
-    order_tracker: OrderTracker, mock_storage: Mock
+    old_status: str, new_status: str, order_tracker: OrderTracker, mock_storage: Mock
 ):
     """Tests getting an existing order using an order_id."""
     order_id = "ORD001"
@@ -96,14 +101,14 @@ def test_update_order_status_successfully(
     }
     expected = {
         **base,
-        "status": "shipped"
+        "status": new_status
     }
     mock_storage.get_order.return_value = {
         **base,
-        "status": "pending"        
+        "status": old_status
     }
     mock_storage.save_order.return_value = expected
-    actual = order_tracker.update_order_status(order_id, "shipped")
+    actual = order_tracker.update_order_status(order_id, new_status)
 
     # We expect save_order to be called once
     mock_storage.get_order.assert_called_once_with(order_id=order_id)
@@ -112,6 +117,35 @@ def test_update_order_status_successfully(
         order_data=expected
     )
     assert actual == expected
+
+@pytest.mark.parametrize(
+    "old_status, new_status",
+    [("processing", "unknown"), ("processing", ""), ("processing", None)]
+)
+def test_update_order_status_with_invalid_status_failure(
+    old_status: str, new_status: str | None, order_tracker: OrderTracker, mock_storage: Mock
+):
+    """Tests getting an existing order using an order_id."""
+    order_id = "ORD001"
+    base = {
+        "order_id": order_id,
+        "item_name": "Laptop",
+        "quantity": 1,
+        "customer_id": "CUST001",
+    }
+    mock_storage.get_order.return_value = {
+        **base,
+        "status": old_status
+    }
+    
+    with pytest.raises(
+        ValueError, match=re.escape(f"Invalid status update (Value: '{new_status}')")
+    ):
+        _ = order_tracker.update_order_status(order_id, new_status)
+
+    # We expect save_order to be called once
+    mock_storage.get_order.assert_not_called()
+    mock_storage.save_order.assert_not_called()
 
 def test_update_order_status__raises_error_if_not_exists(
     order_tracker: OrderTracker, mock_storage: Mock
