@@ -24,7 +24,7 @@ def add_order_api():
 def get_order_api(order_id):
     if not (order := order_tracker.get_order_by_id(order_id=order_id)):
         return jsonify({"error": "Order not found"}), 404
-#https://github.com/bochap-udacity/cd14599-project-starter    
+
     return jsonify(order)
 
 @app.route('/api/orders/<string:order_id>/status', methods=['PUT'])
